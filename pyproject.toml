@@ -1,5 +1,5 @@
 [project]
-name = "cookiecutter-django"
+name = "cookiecutter-django-rest-api"
 version = "2025.05.24"
 description = "A Cookiecutter template for creating production-ready Django projects quickly."
 readme = "README.md"
@@ -91,7 +91,6 @@ norecursedirs = [
   "venv",
   "*/{{cookiecutter.project_slug}}/*",
 ]
-
 # ==== djLint ====
 
 [tool.djlint]
@@ -112,3 +111,4 @@ indent_size = 2
 
 [tool.djlint.js]
 indent_size = 2
+

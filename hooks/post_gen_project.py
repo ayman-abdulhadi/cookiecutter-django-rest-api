@@ -1,7 +1,15 @@
+"""
+NOTE:
+    This script is run after the project is generated.
+    This script:
+        1. Removes files depending on the user's input
+"""
 import json
 import random
 import shutil
 import string
+import os
+import sys
 from pathlib import Path
 
 try:
@@ -20,6 +28,9 @@ SUCCESS = "\x1b[1;32m [SUCCESS]: "
 
 DEBUG_VALUE = "debug"
 
+# Get the root project directory
+PROJECT_DIRECTORY = Path.cwd().absolute()
+DOCS_DIRECTORY = PROJECT_DIRECTORY / "docs"
 
 def remove_open_source_files():
     file_names = ["CONTRIBUTORS.txt", "LICENSE"]
@@ -86,17 +97,22 @@ def remove_heroku_files():
 
 
 def remove_sass_files():
-    shutil.rmtree(Path("{{cookiecutter.project_slug}}", "static", "sass"))
+    sass_path = Path("{{cookiecutter.project_slug}}", "static", "sass")
+    if sass_path.exists():
+        shutil.rmtree(sass_path)
 
 
 def remove_gulp_files():
     file_names = ["gulpfile.mjs"]
     for file_name in file_names:
-        Path(file_name).unlink()
+        if Path(file_name).exists():
+            Path(file_name).unlink()
 
 
 def remove_webpack_files():
-    shutil.rmtree("webpack")
+    webpack_path = Path("webpack")
+    if webpack_path.exists():
+        shutil.rmtree(webpack_path)
     remove_vendors_js()
 
 
@@ -109,7 +125,8 @@ def remove_vendors_js():
 def remove_packagejson_file():
     file_names = ["package.json"]
     for file_name in file_names:
-        Path(file_name).unlink()
+        if Path(file_name).exists():
+            Path(file_name).unlink()
 
 
 def update_package_json(remove_dev_deps=None, remove_keys=None, scripts=None):
@@ -211,7 +228,8 @@ def remove_celery_files():
         Path("{{ cookiecutter.project_slug }}", "users", "tests", "test_tasks.py"),
     ]
     for file_path in file_paths:
-        file_path.unlink()
+        if file_path.exists():
+            file_path.unlink()
 
 
 def remove_async_files():
@@ -220,7 +238,8 @@ def remove_async_files():
         Path("config", "websocket.py"),
     ]
     for file_path in file_paths:
-        file_path.unlink()
+        if file_path.exists():
+            file_path.unlink()
 
 
 def remove_dottravisyml_file():
@@ -392,17 +411,197 @@ def remove_celery_compose_dirs():
 
 
 def remove_node_dockerfile():
-    shutil.rmtree(Path("compose", "local", "node"))
+    node_docker_path = Path("compose", "local", "node")
+    if node_docker_path.exists():
+        shutil.rmtree(node_docker_path)
 
 
 def remove_aws_dockerfile():
-    shutil.rmtree(Path("compose", "production", "aws"))
+    aws_docker_path = Path("compose", "production", "aws")
+    if aws_docker_path.exists():
+        shutil.rmtree(aws_docker_path)
 
 
 def remove_drf_starter_files():
-    Path("config", "api_router.py").unlink()
-    shutil.rmtree(Path("{{cookiecutter.project_slug}}", "users", "api"))
-    shutil.rmtree(Path("{{cookiecutter.project_slug}}", "users", "tests", "api"))
+    """This function is now a no-op since we're making the entire app API-focused"""
+    # We don't want to remove API files anymore
+    pass
+
+
+def remove_docs():
+    """Remove documentation directory if include_docs is 'n'"""
+    if "{{ cookiecutter.include_docs }}" == "n":
+        if os.path.exists(DOCS_DIRECTORY):
+            shutil.rmtree(DOCS_DIRECTORY)
+        
+        # Remove .readthedocs.yml file
+        readthedocs_file = PROJECT_DIRECTORY / ".readthedocs.yml"
+        if os.path.exists(readthedocs_file):
+            os.remove(readthedocs_file)
+
+        # Remove docker-compose.docs.yml file if it exists
+        docker_docs_file = PROJECT_DIRECTORY / "docker-compose.docs.yml"
+        if os.path.exists(docker_docs_file):
+            os.remove(docker_docs_file)
+            
+        # Remove compose/local/docs folder if it exists
+        compose_docs_dir = PROJECT_DIRECTORY / "compose" / "local" / "docs"
+        if os.path.exists(compose_docs_dir):
+            shutil.rmtree(compose_docs_dir)
+
+
+def remove_frontend_related_files():
+    """Remove frontend-related files and directories"""
+    # Remove template directories
+    templates_dir = Path("{{cookiecutter.project_slug}}", "templates")
+    if templates_dir.exists():
+        shutil.rmtree(templates_dir)
+    
+    # Remove static files directory - not needed for API-only
+    static_dir = Path("{{cookiecutter.project_slug}}", "static")
+    if static_dir.exists():
+        shutil.rmtree(static_dir)
+    
+    # Clean up users app to be API-focused
+    users_dir = Path("{{cookiecutter.project_slug}}", "users")
+    if users_dir.exists():
+        # Remove frontend-related files
+        frontend_files = [
+            "views.py", 
+            "forms.py", 
+            "urls.py", 
+            "context_processors.py",
+            "adapters.py"
+        ]
+        for file_name in frontend_files:
+            file_path = users_dir / file_name
+            if file_path.exists():
+                file_path.unlink()
+        
+        # Remove frontend-related test files
+        tests_dir = users_dir / "tests"
+        if tests_dir.exists():
+            frontend_test_files = [
+                "test_forms.py",
+                "test_views.py",
+                "test_urls.py",
+                "test_admin.py"
+            ]
+            for file_name in frontend_test_files:
+                file_path = tests_dir / file_name
+                if file_path.exists():
+                    file_path.unlink()
+        
+        # Remove the api directory - we'll move its contents to the main app
+        api_dir = users_dir / "api"
+        if api_dir.exists():
+            shutil.rmtree(api_dir)
+            
+        # Create serializers.py
+        serializers_content = """from rest_framework import serializers
+
+from .models import User
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        {% if cookiecutter.username_type == "email" %}
+        fields = ["name", "url"]
+
+        extra_kwargs = {
+            "url": {"view_name": "api:users:detail", "lookup_field": "pk"},
+        }
+        {% else %}
+        fields = ["username", "name", "url"]
+
+        extra_kwargs = {
+            "url": {"view_name": "api:users:detail", "lookup_field": "username"},
+        }
+        {% endif %}
+"""
+        (users_dir / "serializers.py").write_text(serializers_content)
+            
+        # Create views.py
+        views_content = """from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin
+from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
+
+from .models import User
+from .serializers import UserSerializer
+
+
+class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericViewSet):
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
+    {% if cookiecutter.username_type == "email" %}
+    lookup_field = "pk"
+    {% else %}
+    lookup_field = "username"
+    {% endif %}
+
+    def get_queryset(self, *args, **kwargs):
+        assert isinstance(self.request.user.id, int)
+        return self.queryset.filter(id=self.request.user.id)
+
+    @action(detail=False)
+    def me(self, request):
+        serializer = UserSerializer(request.user, context={"request": request})
+        return Response(status=status.HTTP_200_OK, data=serializer.data)
+"""
+        (users_dir / "views.py").write_text(views_content)
+        
+        # Create urls.py
+        urls_content = """from django.urls import path
+from rest_framework.routers import DefaultRouter, SimpleRouter
+from django.conf import settings
+
+from .views import UserViewSet
+
+router = DefaultRouter() if settings.DEBUG else SimpleRouter()
+router.register("", UserViewSet)
+
+app_name = "users"
+urlpatterns = router.urls
+"""
+        (users_dir / "urls.py").write_text(urls_content)
+
+
+def handle_language_files():
+    """Replace Portuguese with Arabic language files"""
+    locale_dir = Path("{{cookiecutter.project_slug}}", "locale")
+    if locale_dir.exists():
+        # Remove Portuguese locale
+        pt_br_dir = locale_dir / "pt_BR"
+        if pt_br_dir.exists():
+            shutil.rmtree(pt_br_dir)
+        
+        # Remove French locale
+        fr_fr_dir = locale_dir / "fr_FR"
+        if fr_fr_dir.exists():
+            shutil.rmtree(fr_fr_dir)
+        
+        # Make sure Arabic locale directory exists
+        ar_dir = locale_dir / "ar"
+        if not ar_dir.exists():
+            ar_dir.mkdir(parents=True, exist_ok=True)
+            ar_lc_dir = ar_dir / "LC_MESSAGES"
+            ar_lc_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Also check for locale files in the root directory
+    root_locale_dir = Path("locale")
+    if root_locale_dir.exists():
+        # Remove Portuguese locale
+        root_pt_br_dir = root_locale_dir / "pt_BR"
+        if root_pt_br_dir.exists():
+            shutil.rmtree(root_pt_br_dir)
+        
+        # Remove French locale
+        root_fr_fr_dir = root_locale_dir / "fr_FR"
+        if root_fr_fr_dir.exists():
+            shutil.rmtree(root_fr_fr_dir)
 
 
 def main():
@@ -453,20 +652,16 @@ def main():
         if "{{ cookiecutter.keep_local_envs_in_vcs }}".lower() == "y":
             append_to_gitignore_file("!.envs/.local/")
 
-    if "{{ cookiecutter.frontend_pipeline }}" in ["None", "Django Compressor"]:
-        remove_gulp_files()
-        remove_webpack_files()
-        remove_sass_files()
-        remove_packagejson_file()
-        remove_prettier_pre_commit()
-        if "{{ cookiecutter.use_docker }}".lower() == "y":
-            remove_node_dockerfile()
-    else:
-        handle_js_runner(
-            "{{ cookiecutter.frontend_pipeline }}",
-            use_docker=("{{ cookiecutter.use_docker }}".lower() == "y"),
-            use_async=("{{ cookiecutter.use_async }}".lower() == "y"),
-        )
+    # Always remove frontend-related files
+    remove_sass_files()
+    remove_gulp_files()
+    remove_webpack_files()
+    remove_packagejson_file()
+    remove_prettier_pre_commit()
+    remove_frontend_related_files()
+    
+    if "{{ cookiecutter.use_docker }}".lower() == "y":
+        remove_node_dockerfile()
 
     if "{{ cookiecutter.cloud_provider }}" == "None" and "{{ cookiecutter.use_docker }}".lower() == "n":
         print(
@@ -496,6 +691,11 @@ def main():
 
     if "{{ cookiecutter.use_async }}".lower() == "n":
         remove_async_files()
+
+    # Handle language files - replace Portuguese with Arabic
+    handle_language_files()
+
+    remove_docs()
 
     print(SUCCESS + "Project initialized, keep up the good work!" + TERMINATOR)
 

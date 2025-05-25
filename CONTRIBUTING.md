@@ -1,69 +1,103 @@
-# How to Contribute
+# Contributing
 
-Always happy to get issues identified and pull requests!
+Contributions are welcome, and they are greatly appreciated! Every little bit helps, and credit will always be given.
 
-## General considerations
+You can contribute in many ways:
 
-1. Keep it small. The smaller the change, the more likely we are to accept.
-2. Changes that fix a current issue get priority for review.
-3. Check out [GitHub guide][submit-a-pr] if you've never created a pull request before.
+## Types of Contributions
 
-## Getting started
+### Report Bugs
 
-1. Fork the repo
-2. Clone your fork
-3. Create a branch for your changes
+Report bugs at https://github.com/ayman-abdulhadi/cookiecutter-django-rest-api/issues.
 
-This last step is very important, don't start developing from master, it'll cause pain if you need to send another change later.
+If you are reporting a bug, please include:
 
-## Testing
+* Your operating system name and version.
+* Any details about your local setup that might be helpful in troubleshooting.
+* Detailed steps to reproduce the bug.
 
-You'll need to run the tests using Python 3.12. We recommend using [tox](https://tox.readthedocs.io/en/latest/) to run the tests. It will automatically create a fresh virtual environment and install our test dependencies, such as [pytest-cookies](https://pypi.python.org/pypi/pytest-cookies/) and [flake8](https://pypi.python.org/pypi/flake8/).
+### Fix Bugs
 
-We'll also run the tests on GitHub actions when you send your pull request, but it's a good idea to run them locally before you send it.
+Look through the GitHub issues for bugs. Anything tagged with "bug" and "help wanted" is open to whoever wants to implement it.
 
-### Installation
+### Implement Features
 
-We use uv to manage our environment and manage our Python installation. You can install it following the instructions at https://docs.astral.sh/uv/getting-started/installation/
+Look through the GitHub issues for features. Anything tagged with "enhancement" and "help wanted" is open to whoever wants to implement it.
 
-### Run the template's test suite
+### Write Documentation
 
-To run the tests of the template using the current Python version:
+Cookiecutter Django REST API could always use more documentation, whether as part of the official docs, in docstrings, or even on the web in blog posts, articles, and such.
 
-```bash
-$ uv run tox run -e py
-```
+### Submit Feedback
 
-This uses `pytest `under the hood, and you can pass options to it after a `--`. So to run a particular test:
+The best way to send feedback is to file an issue at https://github.com/ayman-abdulhadi/cookiecutter-django-rest-api/issues.
 
-```bash
-$ uv run tox run -e py -- -k test_default_configuration
-```
+If you are proposing a feature:
 
-For further information, please consult the [pytest usage docs](https://pytest.org/en/latest/how-to/usage.html#specifying-which-tests-to-run).
+* Explain in detail how it would work.
+* Keep the scope as narrow as possible, to make it easier to implement.
+* Remember that this is a volunteer-driven project, and that contributions are welcome :)
 
-### Run the generated project tests
+## Get Started!
 
-The template tests are checking that the generated project is fully rendered and that it passes `flake8`. We also have some test scripts which generate a specific project combination, install the dependencies, run the tests of the generated project, install FE dependencies and generate the docs. They will install the template dependencies, so make sure you create and activate a virtual environment first.
+Ready to contribute? Here's how to set up `cookiecutter-django-rest-api` for local development.
 
-```bash
-$ python -m venv venv
-$ source venv/bin/activate
-```
-
-These tests are slower and can be run with or without Docker:
-
-- Without Docker: `tests/test_bare.sh` (for bare metal)
-- With Docker: `tests/test_docker.sh`
-
-All arguments to these scripts will be passed to the `cookiecutter` CLI, letting you set options, for example:
+1. Fork the `cookiecutter-django-rest-api` repo on GitHub.
+2. Clone your fork locally:
 
 ```bash
-$ tests/test_bare.sh use_celery=y
+git clone git@github.com:your_name_here/cookiecutter-django-rest-api.git
 ```
 
-## Submitting a pull request
+3. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development:
 
-Once you're happy with your changes and they look ok locally, push and send send [a pull request][submit-a-pr] to the main repo, which will trigger the tests on GitHub actions. If they fail, try to fix them. A maintainer should take a look at your change and give you feedback or merge it.
+```bash
+cd cookiecutter-django-rest-api/
+python -m venv venv
+source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+pip install -e ".[dev]"
+```
 
-[submit-a-pr]: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request
+4. Create a branch for local development:
+
+```bash
+git checkout -b name-of-your-bugfix-or-feature
+```
+
+Now you can make your changes locally.
+
+5. When you're done making changes, check that your changes pass the tests:
+
+```bash
+pytest
+```
+
+6. Commit your changes and push your branch to GitHub:
+
+```bash
+git add .
+git commit -m "Your detailed description of your changes."
+git push origin name-of-your-bugfix-or-feature
+```
+
+7. Submit a pull request through the GitHub website.
+
+## Pull Request Guidelines
+
+Before you submit a pull request, check that it meets these guidelines:
+
+1. The pull request should include tests.
+2. If the pull request adds functionality, the docs should be updated. Put your new functionality into a function with a docstring, and add the feature to the list in README.md.
+3. The pull request should work for Python 3.11+.
+
+## Tips
+
+To run a subset of tests:
+
+```bash
+pytest tests/test_cookies.py
+```
+
+## Code of Conduct
+
+Please note that the Cookiecutter Django REST API project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By contributing to this project you agree to abide by its terms.

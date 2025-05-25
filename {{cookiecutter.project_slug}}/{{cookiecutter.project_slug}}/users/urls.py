@@ -1,16 +1,11 @@
 from django.urls import path
+from rest_framework.routers import DefaultRouter, SimpleRouter
+from django.conf import settings
 
-from .views import user_detail_view
-from .views import user_redirect_view
-from .views import user_update_view
+from .views import UserViewSet
+
+router = DefaultRouter() if settings.DEBUG else SimpleRouter()
+router.register("", UserViewSet)
 
 app_name = "users"
-urlpatterns = [
-    path("~redirect/", view=user_redirect_view, name="redirect"),
-    path("~update/", view=user_update_view, name="update"),
-    {%- if cookiecutter.username_type == "email" %}
-    path("<int:pk>/", view=user_detail_view, name="detail"),
-    {%- else %}
-    path("<str:username>/", view=user_detail_view, name="detail"),
-    {%- endif %}
-]
+urlpatterns = router.urls

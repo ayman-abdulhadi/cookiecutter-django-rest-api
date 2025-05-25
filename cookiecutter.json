@@ -1,7 +1,7 @@
 {
-  "project_name": "My Awesome Project",
+  "project_name": "My Awesome API Project",
   "project_slug": "{{ cookiecutter.project_name.lower()|replace(' ', '_')|replace('-', '_')|replace('.', '_')|trim() }}",
-  "description": "Behold My Awesome Project!",
+  "description": "Behold My Awesome API Project!",
   "author_name": "Daniel Roy Greenfeld",
   "domain_name": "example.com",
   "email": "{{ cookiecutter.author_name.lower() | trim() |replace(' ', '-') }}@{{ cookiecutter.domain_name.lower() | trim() }}",
@@ -32,14 +32,23 @@
     "Other SMTP"
   ],
   "use_async": "n",
-  "use_drf": "n",
-  "frontend_pipeline": ["None", "Django Compressor", "Gulp", "Webpack"],
+  "use_drf": "y",
+  "use_jwt_auth": "y",
+  "use_social_auth": "n",
+  "social_auth_providers": ["None", "Google", "Facebook", "Twitter", "Apple", "All"],
+  "include_docs": "n",
   "use_celery": "n",
   "use_mailpit": "n",
   "use_sentry": "n",
-  "use_whitenoise": "n",
-  "use_heroku": "n",
   "ci_tool": ["None", "Travis", "Gitlab", "Github", "Drone"],
   "keep_local_envs_in_vcs": "y",
-  "debug": "n"
+  "debug": "n",
+  "_copy_without_render": [
+    "*.html",
+    "*.js",
+    "*.css"
+  ],
+  "use_whitenoise": "n",
+  "use_heroku": "n",
+  "frontend_pipeline": "None"
 }

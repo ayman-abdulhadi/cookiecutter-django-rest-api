@@ -2,7 +2,7 @@
 
 {{ cookiecutter.description }}
 
-[![Built with Cookiecutter Django](https://img.shields.io/badge/built%20with-Cookiecutter%20Django-ff69b4.svg?logo=cookiecutter)](https://github.com/cookiecutter/cookiecutter-django/)
+[![Built with Cookiecutter Django](https://img.shields.io/badge/built%20with-Cookiecutter%20Django%20REST%20API-ff69b4.svg?logo=cookiecutter)](https://github.com/yourusername/cookiecutter-django-rest-api/)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 {%- if cookiecutter.open_source_license != "Not open source" %}
@@ -10,21 +10,74 @@
 License: {{cookiecutter.open_source_license}}
 {%- endif %}
 
+## API-First Django Project
+
+This project is built as an API-first Django application using Django REST Framework. It's designed to serve as a backend for modern frontend frameworks or mobile applications.
+
+## Features
+
+- Django REST Framework for API development
+{%- if cookiecutter.use_jwt_auth == 'y' %}
+- JWT Authentication with dj-rest-auth
+{%- endif %}
+{%- if cookiecutter.use_social_auth == 'y' %}
+- Social Authentication ({% if cookiecutter.social_auth_providers == 'Google' %}Google{% elif cookiecutter.social_auth_providers == 'Facebook' %}Facebook{% elif cookiecutter.social_auth_providers == 'Twitter' %}Twitter{% elif cookiecutter.social_auth_providers == 'Apple' %}Apple{% elif cookiecutter.social_auth_providers == 'All' %}Google, Facebook, Twitter, Apple{% endif %})
+{%- endif %}
+- API Documentation with DRF Spectacular
+{%- if cookiecutter.use_celery == "y" %}
+- Celery for background tasks
+{%- endif %}
+{%- if cookiecutter.use_sentry == "y" %}
+- Sentry integration for error tracking
+{%- endif %}
+
 ## Settings
 
 Moved to [settings](https://cookiecutter-django.readthedocs.io/en/latest/1-getting-started/settings.html).
+
+## API Endpoints
+
+{%- if cookiecutter.use_jwt_auth == 'y' %}
+### Authentication Endpoints
+
+- `/api/auth/login/` - Log in and obtain JWT token
+- `/api/auth/logout/` - Log out and invalidate JWT token
+- `/api/auth/token/refresh/` - Refresh JWT token
+- `/api/auth/user/` - Retrieve/update the current user
+- `/api/auth/password/change/` - Change user password
+- `/api/auth/password/reset/` - Reset user password
+- `/api/auth/registration/` - Register a new user
+
+{%- if cookiecutter.use_social_auth == 'y' %}
+### Social Authentication Endpoints
+
+{%- if cookiecutter.social_auth_providers == 'Google' or cookiecutter.social_auth_providers == 'All' %}
+- `/api/auth/google/` - Authenticate with Google
+{%- endif %}
+{%- if cookiecutter.social_auth_providers == 'Facebook' or cookiecutter.social_auth_providers == 'All' %}
+- `/api/auth/facebook/` - Authenticate with Facebook
+{%- endif %}
+{%- if cookiecutter.social_auth_providers == 'Twitter' or cookiecutter.social_auth_providers == 'All' %}
+- `/api/auth/twitter/` - Authenticate with Twitter
+{%- endif %}
+{%- if cookiecutter.social_auth_providers == 'Apple' or cookiecutter.social_auth_providers == 'All' %}
+- `/api/auth/apple/` - Authenticate with Apple
+{%- endif %}
+{%- endif %}
+{%- endif %}
+
+### API Documentation
+
+- `/api/docs/` - Swagger UI for API documentation
+- `/api/schema/` - OpenAPI schema
 
 ## Basic Commands
 
 ### Setting Up Your Users
 
-- To create a **normal user account**, just go to Sign Up and fill out the form. Once you submit it, you'll see a "Verify Your E-mail Address" page. Go to your console to see a simulated email verification message. Copy the link into your browser. Now the user's email should be verified and ready to go.
-
 - To create a **superuser account**, use this command:
 
       $ python manage.py createsuperuser
-
-For convenience, you can keep your normal user logged in on Chrome and your superuser logged in on Firefox (or similar), so that you can see how the site behaves for both kinds of users.
 
 ### Type checks
 
@@ -43,10 +96,6 @@ To run the tests, check your test coverage, and generate an HTML coverage report
 #### Running tests with pytest
 
     $ pytest
-
-### Live reloading and Sass CSS compilation
-
-Moved to [Live reloading and SASS compilation](https://cookiecutter-django.readthedocs.io/en/latest/2-local-development/developing-locally.html#using-webpack-or-gulp).
 
 {%- if cookiecutter.use_celery == "y" %}
 
@@ -139,15 +188,4 @@ See detailed [cookiecutter-django Heroku documentation](https://cookiecutter-dja
 
 See detailed [cookiecutter-django Docker documentation](https://cookiecutter-django.readthedocs.io/en/latest/3-deployment/deployment-with-docker.html).
 
-{%- endif %}
-{%- if cookiecutter.frontend_pipeline in ['Gulp', 'Webpack'] %}
-
-### Custom Bootstrap Compilation
-
-The generated CSS is set up with automatic Bootstrap recompilation with variables of your choice.
-Bootstrap v5 is installed using npm and customised by tweaking your variables in `static/sass/custom_bootstrap_vars`.
-
-You can find a list of available variables [in the bootstrap source](https://github.com/twbs/bootstrap/blob/v5.1.3/scss/_variables.scss), or get explanations on them in the [Bootstrap docs](https://getbootstrap.com/docs/5.1/customize/sass/).
-
-Bootstrap's javascript as well as its dependencies are concatenated into a single file: `static/js/vendors.js`.
 {%- endif %}
