@@ -467,9 +467,8 @@ def remove_frontend_related_files():
     if users_dir.exists():
         # Remove frontend-related files
         frontend_files = [
-            "views.py", 
-            "forms.py", 
-            "urls.py", 
+            "views.py",
+            "urls.py",
             "context_processors.py",
             "adapters.py"
         ]
