@@ -103,15 +103,15 @@ THIRD_PARTY_APPS = [
     "django_celery_beat",
 {%- endif %}
     "rest_framework",
-{%- if cookiecutter.use_jwt_auth != 'y' %}
+{%- if cookiecutter.use_jwt_auth == 'y' %}
+    "rest_framework.authtoken",
+    "dj_rest_auth",
+    "dj_rest_auth.registration",
+{%- else %}
     "rest_framework.authtoken",
 {%- endif %}
     "corsheaders",
     "drf_spectacular",
-{%- if cookiecutter.use_jwt_auth == 'y' %}
-    "dj_rest_auth",
-    "dj_rest_auth.registration",
-{%- endif %}
 ]
 
 LOCAL_APPS = [
